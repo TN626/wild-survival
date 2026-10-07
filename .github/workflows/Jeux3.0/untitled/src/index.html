@@ -1,0 +1,4318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Wild Survival</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:Arial,sans-serif;
+  background:#0b72d1;
+}
+
+button{
+  font-family:Arial,sans-serif;
+}
+
+#game{
+  position:fixed;
+  inset:0;
+}
+
+canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  display:block;
+  background:#63b84f;
+}
+
+/* =====================================================
+   MENU PRINCIPAL
+===================================================== */
+
+#mainMenu{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:
+    radial-gradient(
+      circle at 50% 30%,
+      #32a4ff 0%,
+      #0873c9 45%,
+      #064d91 100%
+    );
+
+  color:white;
+}
+
+.menuBox{
+  width:min(430px,90vw);
+  text-align:center;
+}
+
+.gameLogo{
+  font-size:58px;
+  font-weight:900;
+  letter-spacing:2px;
+
+  text-shadow:
+    0 5px 0 #063d70,
+    0 10px 25px rgba(0,0,0,.35);
+
+  margin-bottom:8px;
+}
+
+.gameSubtitle{
+  font-size:16px;
+  opacity:.85;
+  margin-bottom:35px;
+}
+
+.menuButtons{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.menuButton{
+  border:0;
+  border-radius:15px;
+
+  padding:17px;
+
+  font-size:20px;
+  font-weight:bold;
+
+  cursor:pointer;
+
+  color:white;
+
+  background:
+    linear-gradient(
+      180deg,
+      #43a9ff,
+      #0874d1
+    );
+
+  border:2px solid rgba(255,255,255,.25);
+
+  box-shadow:
+    0 8px 20px rgba(0,0,0,.3);
+
+  transition:.15s;
+}
+
+.menuButton:hover{
+  transform:translateY(-3px);
+  filter:brightness(1.12);
+}
+
+.menuButton.play{
+  background:
+    linear-gradient(
+      180deg,
+      #55d96c,
+      #23943a
+    );
+}
+
+/* =====================================================
+   PANELS
+===================================================== */
+
+.panel{
+  position:fixed;
+  inset:0;
+
+  z-index:1100;
+
+  display:none;
+
+  align-items:center;
+  justify-content:center;
+
+  background:rgba(0,20,45,.78);
+}
+
+.panel.open{
+  display:flex;
+}
+
+.panelBox{
+  width:min(520px,92vw);
+
+  max-height:88vh;
+  overflow:auto;
+
+  background:#123a62;
+
+  color:white;
+
+  border:3px solid #55b5ff;
+
+  border-radius:22px;
+
+  padding:25px;
+
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.6);
+}
+
+.panelTitle{
+  text-align:center;
+  font-size:30px;
+  font-weight:bold;
+  margin-bottom:22px;
+}
+
+.panelSection{
+  background:#174a78;
+  padding:18px;
+  border-radius:14px;
+  margin-bottom:14px;
+}
+
+.panelSection h3{
+  margin-top:0;
+}
+
+.panelButton{
+  width:100%;
+
+  border:0;
+  border-radius:10px;
+
+  padding:12px;
+
+  margin-top:8px;
+
+  cursor:pointer;
+
+  background:#3299e8;
+  color:white;
+
+  font-weight:bold;
+  font-size:15px;
+}
+
+.panelButton:hover{
+  background:#49aaff;
+}
+
+.closeButton{
+  background:#b73535;
+}
+
+.rangeRow{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.rangeRow input{
+  flex:1;
+}
+
+/* =====================================================
+   SKINS
+===================================================== */
+
+.skinChoices{
+  display:grid;
+
+  grid-template-columns:
+    repeat(4,1fr);
+
+  gap:12px;
+}
+
+.skin{
+  height:65px;
+
+  border-radius:12px;
+
+  border:3px solid transparent;
+
+  cursor:pointer;
+
+  transition:.12s;
+}
+
+.skin:hover{
+  transform:scale(1.05);
+}
+
+.skin.selected{
+  border-color:#fff;
+  box-shadow:
+    0 0 15px white;
+}
+
+/* =====================================================
+   HUD
+===================================================== */
+
+#hud{
+  position:fixed;
+
+  top:15px;
+  left:15px;
+
+  z-index:100;
+
+  color:white;
+
+  background:rgba(23,61,25,.9);
+
+  padding:12px 16px;
+
+  border-radius:12px;
+
+  font-size:16px;
+
+  user-select:none;
+}
+
+#gameSettings{
+  position:fixed;
+
+  top:15px;
+  right:15px;
+
+  z-index:200;
+
+  width:48px;
+  height:48px;
+
+  border:0;
+  border-radius:12px;
+
+  background:rgba(23,61,25,.9);
+
+  color:white;
+
+  font-size:24px;
+
+  cursor:pointer;
+}
+
+#gameSettings:hover{
+  background:#285f2c;
+}
+
+#fullscreen{
+  position:fixed;
+
+  top:70px;
+  right:15px;
+
+  z-index:200;
+
+  border:0;
+
+  border-radius:12px;
+
+  padding:10px 13px;
+
+  background:rgba(23,61,25,.9);
+
+  color:white;
+
+  font-weight:bold;
+
+  cursor:pointer;
+}
+
+/* =====================================================
+   RESSOURCES
+===================================================== */
+
+#resources{
+  position:fixed;
+
+  top:83px;
+  left:15px;
+
+  z-index:100;
+
+  color:white;
+
+  background:rgba(23,61,25,.85);
+
+  padding:9px 13px;
+
+  border-radius:10px;
+
+  font-size:14px;
+}
+
+/* =====================================================
+   DAMAGE EFFECT
+===================================================== */
+
+#damageFlash{
+  position:fixed;
+
+  inset:0;
+
+  z-index:500;
+
+  pointer-events:none;
+
+  opacity:0;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255,0,0,0) 25%,
+      rgba(255,0,0,.18) 60%,
+      rgba(255,0,0,.7) 100%
+    );
+
+  transition:opacity .08s;
+}
+
+#damageFlash.show{
+  opacity:1;
+}
+
+/* =====================================================
+   AIDE
+===================================================== */
+
+#help{
+  position:fixed;
+
+  bottom:105px;
+  left:50%;
+
+  transform:translateX(-50%);
+
+  z-index:100;
+
+  color:white;
+
+  background:rgba(23,61,25,.85);
+
+  padding:8px 14px;
+
+  border-radius:10px;
+
+  text-align:center;
+
+  font-size:13px;
+
+  white-space:nowrap;
+}
+
+/* =====================================================
+   HOTBAR
+===================================================== */
+
+#hotbar{
+  position:fixed;
+
+  bottom:18px;
+  left:50%;
+
+  transform:translateX(-50%);
+
+  z-index:150;
+
+  display:flex;
+
+  gap:5px;
+
+  padding:7px;
+
+  background:rgba(20,25,30,.88);
+
+  border:2px solid rgba(255,255,255,.25);
+
+  border-radius:12px;
+
+  box-shadow:
+    0 8px 25px rgba(0,0,0,.4);
+}
+
+.slot{
+  position:relative;
+
+  width:62px;
+  height:62px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #444,
+      #252525
+    );
+
+  border:2px solid #777;
+
+  border-radius:8px;
+
+  cursor:pointer;
+
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+}
+
+.slot.selected{
+  border:3px solid #ffd83d;
+
+  background:
+    linear-gradient(
+      145deg,
+      #625a2c,
+      #393417
+    );
+
+  box-shadow:
+    0 0 12px rgba(255,216,61,.7);
+}
+
+.slotKey{
+  position:absolute;
+
+  top:3px;
+  left:5px;
+
+  color:#fff;
+
+  font-weight:bold;
+  font-size:13px;
+}
+
+.slotIcon{
+  font-size:35px;
+
+  filter:
+    drop-shadow(
+      1px 2px 2px rgba(0,0,0,.7)
+    );
+}
+
+.slotCount{
+  position:absolute;
+
+  bottom:3px;
+  right:5px;
+
+  color:white;
+
+  font-weight:bold;
+}
+
+/* =====================================================
+   SHOP
+===================================================== */
+
+#shop{
+  position:fixed;
+  inset:0;
+
+  z-index:900;
+
+  display:none;
+
+  align-items:center;
+  justify-content:center;
+
+  background:rgba(0,0,0,.7);
+}
+
+#shop.open{
+  display:flex;
+}
+
+.shopBox{
+  width:min(800px,92vw);
+
+  max-height:88vh;
+  overflow:auto;
+
+  background:#173d19;
+  color:white;
+
+  border:3px solid #55a85c;
+
+  border-radius:20px;
+
+  padding:25px;
+}
+
+.shopTitle{
+  text-align:center;
+  font-size:30px;
+}
+
+.shopMoney{
+  text-align:center;
+  color:#ffd700;
+  font-size:18px;
+  margin:15px;
+}
+
+.shopItems{
+  display:grid;
+  grid-template-columns:
+    repeat(4,1fr);
+  gap:12px;
+}
+
+.shopItem{
+  background:#285f2c;
+  border-radius:14px;
+  padding:14px;
+  text-align:center;
+}
+
+.shopIcon{
+  font-size:45px;
+}
+
+.shopItem h3{
+  margin:7px 0;
+}
+
+.shopItem p{
+  min-height:45px;
+  font-size:13px;
+}
+
+.shopItem button{
+  width:100%;
+  border:0;
+  border-radius:9px;
+  padding:10px;
+
+  background:#ffd700;
+  color:#3b3000;
+
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.shopItem button:disabled{
+  background:#777;
+  color:#ccc;
+}
+
+.shopClose{
+  display:block;
+  margin:20px auto 0;
+
+  border:0;
+  border-radius:10px;
+
+  padding:11px 25px;
+
+  background:#b73535;
+  color:white;
+
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media(max-width:700px){
+
+  .gameLogo{
+    font-size:42px;
+  }
+
+  .slot{
+    width:48px;
+    height:48px;
+  }
+
+  .slotIcon{
+    font-size:27px;
+  }
+
+  #help{
+    display:none;
+  }
+
+  .shopItems{
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+  #resources{
+    top:125px;
+  }
+
+}
+</style>
+</head>
+
+<body>
+
+<!-- =====================================================
+     MENU PRINCIPAL
+===================================================== -->
+
+<div id="mainMenu">
+
+  <div class="menuBox">
+
+    <div class="gameLogo">
+      WILD SURVIVAL
+    </div>
+
+    <div class="gameSubtitle">
+      Survis. Récolte. Construis.
+    </div>
+
+    <div class="menuButtons">
+
+      <button class="menuButton play" id="playButton">
+        ▶ JOUER
+      </button>
+
+      <button class="menuButton" id="skinButton">
+        🎨 SKIN
+      </button>
+
+      <button class="menuButton" id="settingsButton">
+        ⚙️ PARAMÈTRES
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     SKIN
+===================================================== -->
+
+<div id="skinPanel" class="panel">
+
+  <div class="panelBox">
+
+    <div class="panelTitle">
+      🎨 SKIN
+    </div>
+
+    <div class="panelSection">
+
+      <h3>
+        Couleur du personnage
+      </h3>
+
+      <div class="skinChoices">
+
+        <div class="skin selected"
+             data-color="#287cff"
+             style="background:#287cff"></div>
+
+        <div class="skin"
+             data-color="#e53935"
+             style="background:#e53935"></div>
+
+        <div class="skin"
+             data-color="#43a047"
+             style="background:#43a047"></div>
+
+        <div class="skin"
+             data-color="#fbc02d"
+             style="background:#fbc02d"></div>
+
+        <div class="skin"
+             data-color="#8e44ad"
+             style="background:#8e44ad"></div>
+
+        <div class="skin"
+             data-color="#ff7f27"
+             style="background:#ff7f27"></div>
+
+        <div class="skin"
+             data-color="#00bcd4"
+             style="background:#00bcd4"></div>
+
+        <div class="skin"
+             data-color="#eeeeee"
+             style="background:#eeeeee"></div>
+
+      </div>
+
+    </div>
+
+    <button
+      class="panelButton closeButton"
+      id="closeSkin">
+      RETOUR
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     PARAMETRES MENU
+===================================================== -->
+
+<div id="settingsPanel" class="panel">
+
+  <div class="panelBox">
+
+    <div class="panelTitle">
+      ⚙️ PARAMÈTRES
+    </div>
+
+    <div class="panelSection">
+
+      <h3>
+        🔊 Son
+      </h3>
+
+      <div class="rangeRow">
+
+        <span>Volume</span>
+
+        <input
+          id="volumeRange"
+          type="range"
+          min="0"
+          max="100"
+          value="70">
+
+        <span id="volumeValue">
+          70%
+        </span>
+
+      </div>
+
+    </div>
+
+    <div class="panelSection">
+
+      <h3>
+        🎵 Musique
+      </h3>
+
+      <button
+        class="panelButton"
+        id="musicToggle">
+        🎵 MUSIQUE : ON
+      </button>
+
+    </div>
+
+    <button
+      class="panelButton closeButton"
+      id="closeSettings">
+      RETOUR
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     JEU
+===================================================== -->
+
+<div id="game">
+
+  <canvas id="canvas"></canvas>
+
+  <div id="damageFlash"></div>
+
+  <div id="hud">
+
+    ❤️ <span id="hp">100</span>
+
+    &nbsp;&nbsp;
+
+    🪙 <span id="money">0</span>
+
+    &nbsp;&nbsp;
+
+    🍎 <span id="apples">0</span>
+
+  </div>
+
+  <div id="resources">
+
+    🪵 <span id="wood">0</span>
+
+    &nbsp;&nbsp;
+
+    🪨 <span id="stone">0</span>
+
+  </div>
+
+  <button id="gameSettings">
+    ⚙️
+  </button>
+
+  <button id="fullscreen">
+    ⛶
+  </button>
+
+  <div id="help">
+    ZQSD • F = boutique • Clic gauche = utiliser • Clic droit = bouclier
+  </div>
+
+
+  <div id="hotbar">
+
+    <div class="slot" data-slot="0">
+      <span class="slotKey">&amp;</span>
+      <span class="slotIcon">⚔️</span>
+    </div>
+
+    <div class="slot" data-slot="1">
+      <span class="slotKey">é</span>
+      <span class="slotIcon">🗡️</span>
+    </div>
+
+    <div class="slot" data-slot="2">
+      <span class="slotKey">"</span>
+      <span class="slotIcon">🛡️</span>
+    </div>
+
+    <div class="slot" data-slot="3">
+      <span class="slotKey">'</span>
+      <span class="slotIcon">🍎</span>
+      <span class="slotCount" id="appleCount"></span>
+    </div>
+
+    <div class="slot" data-slot="4">
+      <span class="slotKey">(</span>
+      <span class="slotIcon">⛏️</span>
+    </div>
+
+    <div class="slot" data-slot="5">
+      <span class="slotKey">-</span>
+      <span class="slotIcon">🪓</span>
+    </div>
+
+    <div class="slot" data-slot="6">
+      <span class="slotKey">è</span>
+      <span class="slotIcon">?</span>
+    </div>
+
+    <div class="slot" data-slot="7">
+      <span class="slotKey">_</span>
+      <span class="slotIcon">?</span>
+    </div>
+
+    <div class="slot" data-slot="8">
+      <span class="slotKey">ç</span>
+      <span class="slotIcon">?</span>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     PARAMETRES EN JEU
+===================================================== -->
+
+<div id="gameSettingsPanel" class="panel">
+
+  <div class="panelBox">
+
+    <div class="panelTitle">
+      ⚙️ PARAMÈTRES
+    </div>
+
+    <div class="panelSection">
+
+      <h3>
+        🔊 Volume
+      </h3>
+
+      <div class="rangeRow">
+
+        <input
+          id="gameVolumeRange"
+          type="range"
+          min="0"
+          max="100"
+          value="70">
+
+        <span id="gameVolumeValue">
+          70%
+        </span>
+
+      </div>
+
+    </div>
+
+    <button
+      class="panelButton"
+      id="gameMusicToggle">
+      🎵 MUSIQUE : ON
+    </button>
+
+    <button
+      class="panelButton"
+      id="resumeButton">
+      ▶ REPRENDRE
+    </button>
+
+    <button
+      class="panelButton closeButton"
+      id="gameMenuButton">
+      🏠 MENU PRINCIPAL
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     BOUTIQUE
+===================================================== -->
+
+<div id="shop">
+
+  <div class="shopBox">
+
+    <div class="shopTitle">
+      🛒 BOUTIQUE
+    </div>
+
+    <div class="shopMoney">
+      🪙 <span id="shopMoney">0</span>
+    </div>
+
+    <div class="shopItems">
+
+      <div class="shopItem">
+
+        <div class="shopIcon">⚔️</div>
+
+        <h3>Épée d'acier</h3>
+
+        <p>
+          12 dégâts<br>
+          Bonne portée
+        </p>
+
+        <button id="buySword1">
+          Acheter — 10 🪙
+        </button>
+
+      </div>
+
+
+      <div class="shopItem">
+
+        <div class="shopIcon">🗡️</div>
+
+        <h3>Épée infernale</h3>
+
+        <p>
+          25 dégâts<br>
+          Très puissante
+        </p>
+
+        <button id="buySword2">
+          Acheter — 30 🪙
+        </button>
+
+      </div>
+
+
+      <div class="shopItem">
+
+        <div class="shopIcon">🛡️</div>
+
+        <h3>Bouclier royal</h3>
+
+        <p>
+          Bloque une attaque
+        </p>
+
+        <button id="buyShield">
+          Acheter — 20 🪙
+        </button>
+
+      </div>
+
+
+      <div class="shopItem">
+
+        <div class="shopIcon">🍎</div>
+
+        <h3>Pomme</h3>
+
+        <p>
+          Restaure 25 HP
+        </p>
+
+        <button id="buyApple">
+          Acheter — 5 🪙
+        </button>
+
+      </div>
+
+    </div>
+
+    <button
+      class="shopClose"
+      id="closeShop">
+      FERMER
+    </button>
+
+  </div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   CANVAS
+===================================================== */
+
+const canvas =
+document.getElementById("canvas");
+
+const ctx =
+canvas.getContext("2d");
+
+let W =
+window.innerWidth;
+
+let H =
+window.innerHeight;
+
+function resizeCanvas(){
+
+  W = window.innerWidth;
+  H = window.innerHeight;
+
+  const dpr =
+    Math.min(
+      window.devicePixelRatio || 1,
+      2
+    );
+
+  canvas.width =
+    Math.floor(W*dpr);
+
+  canvas.height =
+    Math.floor(H*dpr);
+
+  canvas.style.width =
+    W+"px";
+
+  canvas.style.height =
+    H+"px";
+
+  ctx.setTransform(
+    dpr,
+    0,
+    0,
+    dpr,
+    0,
+    0
+  );
+
+}
+
+resizeCanvas();
+
+window.addEventListener(
+  "resize",
+  resizeCanvas
+);
+
+
+/* =====================================================
+   FULLSCREEN
+===================================================== */
+
+const fullscreen =
+document.getElementById("fullscreen");
+
+fullscreen.addEventListener(
+  "click",
+  async()=>{
+
+    try{
+
+      if(!document.fullscreenElement){
+
+        await document.documentElement
+          .requestFullscreen();
+
+      }else{
+
+        await document.exitFullscreen();
+
+      }
+
+    }catch(e){}
+
+  }
+);
+
+document.addEventListener(
+  "fullscreenchange",
+  ()=>{
+
+    fullscreen.textContent =
+      document.fullscreenElement
+      ? "✕"
+      : "⛶";
+
+    setTimeout(
+      resizeCanvas,
+      100
+    );
+
+  }
+);
+
+
+/* =====================================================
+   AUDIO
+===================================================== */
+
+let audioContext = null;
+
+let masterGain = null;
+
+let musicTimer = null;
+
+let musicEnabled = true;
+
+let volume = 0.7;
+
+let musicStep = 0;
+
+
+function startAudio(){
+
+  if(!audioContext){
+
+    audioContext =
+      new (
+        window.AudioContext ||
+        window.webkitAudioContext
+      )();
+
+    masterGain =
+      audioContext.createGain();
+
+    masterGain.gain.value =
+      volume;
+
+    masterGain.connect(
+      audioContext.destination
+    );
+
+  }
+
+  if(
+    audioContext.state ===
+    "suspended"
+  ){
+
+    audioContext.resume();
+
+  }
+
+}
+
+
+function sound(
+  frequency,
+  duration=.1,
+  type="square",
+  gainAmount=.05
+){
+
+  if(!audioContext)
+    return;
+
+  if(volume<=0)
+    return;
+
+  const osc =
+    audioContext.createOscillator();
+
+  const gain =
+    audioContext.createGain();
+
+  osc.type = type;
+
+  osc.frequency.value =
+    frequency;
+
+  gain.gain.setValueAtTime(
+    gainAmount,
+    audioContext.currentTime
+  );
+
+  gain.gain.exponentialRampToValueAtTime(
+    .001,
+    audioContext.currentTime+
+    duration
+  );
+
+  osc.connect(gain);
+
+  gain.connect(masterGain);
+
+  osc.start();
+
+  osc.stop(
+    audioContext.currentTime+
+    duration
+  );
+
+}
+
+
+/*
+  Petite musique de survie.
+*/
+
+const melody = [
+  261.63,
+  329.63,
+  392,
+  329.63,
+  293.66,
+  349.23,
+  440,
+  349.23
+];
+
+
+function musicTick(){
+
+  if(
+    !musicEnabled ||
+    !audioContext
+  ){
+
+    return;
+
+  }
+
+  sound(
+    melody[musicStep%melody.length],
+    .22,
+    "triangle",
+    .025
+  );
+
+  musicStep++;
+
+}
+
+
+function startMusic(){
+
+  startAudio();
+
+  if(musicTimer)
+    return;
+
+  musicTimer =
+    setInterval(
+      musicTick,
+      450
+    );
+
+}
+
+
+function stopMusic(){
+
+  if(musicTimer){
+
+    clearInterval(
+      musicTimer
+    );
+
+    musicTimer=null;
+
+  }
+
+}
+
+
+function updateAudio(){
+
+  if(masterGain){
+
+    masterGain.gain.value =
+      volume;
+
+  }
+
+  if(
+    musicEnabled &&
+    audioContext
+  ){
+
+    startMusic();
+
+  }else{
+
+    stopMusic();
+
+  }
+
+}
+
+
+/* =====================================================
+   SAUVEGARDE
+===================================================== */
+
+const SAVE_KEY =
+"wild_survival_save_v2";
+
+
+function saveGame(){
+
+  const data = {
+
+    money:collected,
+
+    wood:wood,
+
+    stone:stone,
+
+    apples:player.apples,
+
+    hp:player.hp,
+
+    weapons:player.weapons,
+
+    shieldOwned:player.shieldOwned,
+
+    skin:player.color,
+
+    volume:volume,
+
+    musicEnabled:musicEnabled
+
+  };
+
+  localStorage.setItem(
+    SAVE_KEY,
+    JSON.stringify(data)
+  );
+
+}
+
+
+function loadGame(){
+
+  try{
+
+    const raw =
+      localStorage.getItem(
+        SAVE_KEY
+      );
+
+    if(!raw)
+      return;
+
+    const data =
+      JSON.parse(raw);
+
+    collected =
+      data.money ?? 0;
+
+    wood =
+      data.wood ?? 0;
+
+    stone =
+      data.stone ?? 0;
+
+    player.apples =
+      data.apples ?? 0;
+
+    player.hp =
+      data.hp ?? 100;
+
+    player.weapons =
+      data.weapons ??
+      [false,false];
+
+    player.shieldOwned =
+      data.shieldOwned ??
+      false;
+
+    player.color =
+      data.skin ??
+      "#287cff";
+
+    volume =
+      data.volume ??
+      .7;
+
+    musicEnabled =
+      data.musicEnabled ??
+      true;
+
+  }catch(e){}
+
+}
+
+
+/* =====================================================
+   PLAYER
+===================================================== */
+
+const player = {
+
+  x:0,
+  y:0,
+
+  size:32,
+
+  speed:4,
+
+  hp:100,
+  maxHp:100,
+
+  color:"#287cff",
+
+  hitCooldown:0,
+
+  shieldOwned:false,
+  shieldActive:false,
+  shieldCooldown:0,
+
+  attackCooldown:0,
+  attackAnimation:0,
+
+  toolAnimation:0,
+
+  selectedSlot:0,
+
+  weapons:[
+    true,
+    false
+  ],
+
+  apples:0
+
+};
+
+
+/* =====================================================
+   SOURIS
+===================================================== */
+
+const mouse = {
+
+  x:W/2,
+  y:H/2
+
+};
+
+canvas.addEventListener(
+  "mousemove",
+  e=>{
+
+    mouse.x =
+      e.clientX;
+
+    mouse.y =
+      e.clientY;
+
+  }
+);
+
+
+/* =====================================================
+   CLAVIER
+===================================================== */
+
+const keys={};
+
+const keySlots={
+
+  "&":0,
+  "é":1,
+  '"':2,
+  "'":3,
+  "(":4,
+  "-":5,
+  "è":6,
+  "_":7,
+  "ç":8
+
+};
+
+window.addEventListener(
+  "keydown",
+  e=>{
+
+    const key =
+      e.key;
+
+    keys[
+      key.toLowerCase()
+    ] = true;
+
+    if(
+      key.toLowerCase()==="f"
+    ){
+
+      toggleShop();
+      return;
+
+    }
+
+    if(
+      Object.prototype
+        .hasOwnProperty
+        .call(
+          keySlots,
+          key
+        )
+    ){
+
+      selectSlot(
+        keySlots[key]
+      );
+
+    }
+
+  }
+);
+
+window.addEventListener(
+  "keyup",
+  e=>{
+
+    keys[
+      e.key.toLowerCase()
+    ] = false;
+
+  }
+);
+
+
+/* =====================================================
+   MONDE
+===================================================== */
+
+const CELL=500;
+
+const generated =
+new Set();
+
+let trees=[];
+
+let rocks=[];
+
+let coins=[];
+
+let enemies=[];
+
+let wood=0;
+
+let stone=0;
+
+let collected=0;
+
+const spawnPoint={
+  x:0,
+  y:0
+};
+
+const DOME_RADIUS=180;
+
+
+/* =====================================================
+   GENERATION
+===================================================== */
+
+function generateArea(){
+
+  const cx =
+    Math.floor(
+      player.x/CELL
+    );
+
+  const cy =
+    Math.floor(
+      player.y/CELL
+    );
+
+  for(
+    let gx=cx-1;
+    gx<=cx+1;
+    gx++
+  ){
+
+    for(
+      let gy=cy-1;
+      gy<=cy+1;
+      gy++
+    ){
+
+      const id =
+        gx+"_"+gy;
+
+      if(
+        generated.has(id)
+      )
+        continue;
+
+      generated.add(id);
+
+      const baseX =
+        gx*CELL;
+
+      const baseY =
+        gy*CELL;
+
+
+      /*
+        ARBRES
+      */
+
+      for(
+        let i=0;
+        i<5;
+        i++
+      ){
+
+        trees.push({
+
+          x:
+            baseX+
+            Math.random()*CELL,
+
+          y:
+            baseY+
+            Math.random()*CELL,
+
+          size:
+            28+
+            Math.random()*22,
+
+          hp:3
+
+        });
+
+      }
+
+
+      /*
+        PIERRES
+      */
+
+      for(
+        let i=0;
+        i<4;
+        i++
+      ){
+
+        rocks.push({
+
+          x:
+            baseX+
+            Math.random()*CELL,
+
+          y:
+            baseY+
+            Math.random()*CELL,
+
+          size:
+            20+
+            Math.random()*15,
+
+          hp:3
+
+        });
+
+      }
+
+
+      /*
+        PIECES
+      */
+
+      for(
+        let i=0;
+        i<4;
+        i++
+      ){
+
+        coins.push({
+
+          x:
+            baseX+
+            Math.random()*CELL,
+
+          y:
+            baseY+
+            Math.random()*CELL,
+
+          collected:false
+
+        });
+
+      }
+
+
+      /*
+        MOBS
+      */
+
+      for(
+        let i=0;
+        i<2;
+        i++
+      ){
+
+        let x =
+          baseX+
+          Math.random()*CELL;
+
+        let y =
+          baseY+
+          Math.random()*CELL;
+
+        if(
+          Math.hypot(
+            x-spawnPoint.x,
+            y-spawnPoint.y
+          )
+          <
+          DOME_RADIUS+60
+        ){
+
+          x+=250;
+
+        }
+
+        enemies.push({
+
+          x:x,
+          y:y,
+
+          size:30,
+
+          speed:
+            .7+
+            Math.random()*.6,
+
+          angle:
+            Math.random()*
+            Math.PI*2,
+
+          timer:
+            40+
+            Math.random()*100,
+
+          chase:false,
+
+          hp:40,
+          maxHp:40,
+
+          showHealth:false,
+          healthTimer:0
+
+        });
+
+      }
+
+    }
+
+  }
+
+}
+
+
+/* =====================================================
+   DISTANCE
+===================================================== */
+
+function distance(a,b){
+
+  return Math.hypot(
+    a.x-b.x,
+    a.y-b.y
+  );
+
+}
+
+
+/* =====================================================
+   HOTBAR
+===================================================== */
+
+const slots =
+document.querySelectorAll(
+  ".slot"
+);
+
+
+function selectSlot(slot){
+
+  if(
+    slot===0 &&
+    !player.weapons[0]
+  )
+    return;
+
+  if(
+    slot===1 &&
+    !player.weapons[1]
+  )
+    return;
+
+  if(
+    slot===2 &&
+    !player.shieldOwned
+  )
+    return;
+
+  if(
+    slot===3 &&
+    player.apples<=0
+  )
+    return;
+
+  player.selectedSlot =
+    slot;
+
+  updateHotbar();
+
+}
+
+
+function updateHotbar(){
+
+  slots.forEach(
+    (slot,index)=>{
+
+      slot.classList.toggle(
+        "selected",
+        index===
+        player.selectedSlot
+      );
+
+    }
+  );
+
+  slots[0].style.opacity =
+    player.weapons[0]
+    ? 1
+    : .35;
+
+  slots[1].style.opacity =
+    player.weapons[1]
+    ? 1
+    : .35;
+
+  slots[2].style.opacity =
+    player.shieldOwned
+    ? 1
+    : .35;
+
+  slots[3].style.opacity =
+    player.apples>0
+    ? 1
+    : .35;
+
+  slots[4].style.opacity =
+    1;
+
+  slots[5].style.opacity =
+    1;
+
+  document.getElementById(
+    "appleCount"
+  ).textContent =
+    player.apples ||
+    "";
+
+}
+
+
+slots.forEach(
+  slot=>{
+
+    slot.addEventListener(
+      "click",
+      ()=>{
+
+        selectSlot(
+          Number(
+            slot.dataset.slot
+          )
+        );
+
+      }
+    );
+
+  }
+);
+
+
+/* =====================================================
+   SHOP
+===================================================== */
+
+const shop =
+document.getElementById(
+  "shop"
+);
+
+function isShopOpen(){
+
+  return shop.classList
+    .contains("open");
+
+}
+
+function toggleShop(){
+
+  if(isShopOpen())
+    closeShop();
+  else
+    openShop();
+
+}
+
+function openShop(){
+
+  shop.classList.add(
+    "open"
+  );
+
+  updateShop();
+
+}
+
+function closeShop(){
+
+  shop.classList.remove(
+    "open"
+  );
+
+}
+
+document.getElementById(
+  "closeShop"
+).onclick =
+closeShop;
+
+
+/* =====================================================
+   SHOP ACHATS
+===================================================== */
+
+function buySword(number){
+
+  const price =
+    number===0
+    ?10
+    :30;
+
+  if(
+    collected<price ||
+    player.weapons[number]
+  )
+    return;
+
+  collected-=price;
+
+  player.weapons[number]=
+    true;
+
+  sound(
+    700,
+    .12,
+    "square",
+    .08
+  );
+
+  updateShop();
+  updateHotbar();
+  saveGame();
+
+}
+
+
+function buyShield(){
+
+  if(
+    collected<20 ||
+    player.shieldOwned
+  )
+    return;
+
+  collected-=20;
+
+  player.shieldOwned=true;
+
+  sound(
+    500,
+    .15,
+    "triangle",
+    .08
+  );
+
+  updateShop();
+  updateHotbar();
+  saveGame();
+
+}
+
+
+function buyApple(){
+
+  if(
+    collected<5
+  )
+    return;
+
+  collected-=5;
+
+  player.apples++;
+
+  sound(
+    800,
+    .1,
+    "square",
+    .06
+  );
+
+  updateShop();
+  updateHotbar();
+  saveGame();
+
+}
+
+
+document.getElementById(
+  "buySword1"
+).onclick =
+()=>buySword(0);
+
+document.getElementById(
+  "buySword2"
+).onclick =
+()=>buySword(1);
+
+document.getElementById(
+  "buyShield"
+).onclick =
+buyShield;
+
+document.getElementById(
+  "buyApple"
+).onclick =
+buyApple;
+
+
+function updateShop(){
+
+  document.getElementById(
+    "shopMoney"
+  ).textContent =
+    collected;
+
+  const sword1 =
+    document.getElementById(
+      "buySword1"
+    );
+
+  const sword2 =
+    document.getElementById(
+      "buySword2"
+    );
+
+  const shield =
+    document.getElementById(
+      "buyShield"
+    );
+
+  sword1.disabled =
+    player.weapons[0] ||
+    collected<10;
+
+  sword2.disabled =
+    player.weapons[1] ||
+    collected<30;
+
+  shield.disabled =
+    player.shieldOwned ||
+    collected<20;
+
+  sword1.textContent =
+    player.weapons[0]
+    ?"ACHETÉ ✓"
+    :"Acheter — 10 🪙";
+
+  sword2.textContent =
+    player.weapons[1]
+    ?"ACHETÉ ✓"
+    :"Acheter — 30 🪙";
+
+  shield.textContent =
+    player.shieldOwned
+    ?"ACHETÉ ✓"
+    :"Acheter — 20 🪙";
+
+}
+
+
+/* =====================================================
+   OUTILS
+===================================================== */
+
+function useTool(){
+
+  if(
+    player.selectedSlot!==4 &&
+    player.selectedSlot!==5
+  )
+    return;
+
+  if(
+    player.toolAnimation>0
+  )
+    return;
+
+  player.toolAnimation=18;
+
+  sound(
+    player.selectedSlot===4
+    ?180
+    :120,
+    .12,
+    "square",
+    .07
+  );
+
+  const angle =
+    Math.atan2(
+      mouse.y-H/2,
+      mouse.x-W/2
+    );
+
+  const range=90;
+
+  const targetX =
+    player.x+
+    Math.cos(angle)*
+    range;
+
+  const targetY =
+    player.y+
+    Math.sin(angle)*
+    range;
+
+
+  /*
+    PIOCHE → PIERRE
+  */
+
+  if(
+    player.selectedSlot===4
+  ){
+
+    let target=null;
+
+    let best=Infinity;
+
+    for(
+      const rock of rocks
+    ){
+
+      const d =
+        Math.hypot(
+          rock.x-targetX,
+          rock.y-targetY
+        );
+
+      if(
+        d<50 &&
+        d<best
+      ){
+
+        target=rock;
+        best=d;
+
+      }
+
+    }
+
+    if(target){
+
+      target.hp--;
+
+      if(
+        target.hp<=0
+      ){
+
+        stone +=
+          2+
+          Math.floor(
+            Math.random()*3
+          );
+
+        rocks.splice(
+          rocks.indexOf(target),
+          1
+        );
+
+      }
+
+      saveGame();
+
+    }
+
+  }
+
+
+  /*
+    HACHE → ARBRE
+  */
+
+  if(
+    player.selectedSlot===5
+  ){
+
+    let target=null;
+
+    let best=Infinity;
+
+    for(
+      const tree of trees
+    ){
+
+      const d =
+        Math.hypot(
+          tree.x-targetX,
+          tree.y-targetY
+        );
+
+      if(
+        d<55 &&
+        d<best
+      ){
+
+        target=tree;
+        best=d;
+
+      }
+
+    }
+
+    if(target){
+
+      target.hp--;
+
+      if(
+        target.hp<=0
+      ){
+
+        wood +=
+          2+
+          Math.floor(
+            Math.random()*3
+          );
+
+        trees.splice(
+          trees.indexOf(target),
+          1
+        );
+
+      }
+
+      saveGame();
+
+    }
+
+  }
+
+}
+
+
+/* =====================================================
+   ATTAQUE
+===================================================== */
+
+function attack(){
+
+  if(
+    player.selectedSlot!==0 &&
+    player.selectedSlot!==1
+  )
+    return;
+
+  if(
+    !player.weapons[
+      player.selectedSlot
+    ]
+  )
+    return;
+
+  const weapon =
+    player.selectedSlot===0
+    ?{
+      damage:12,
+      range:95,
+      cooldown:24
+    }
+    :{
+      damage:25,
+      range:110,
+      cooldown:30
+    };
+
+  if(
+    player.attackCooldown>0
+  )
+    return;
+
+  player.attackCooldown =
+    weapon.cooldown;
+
+  player.attackAnimation=12;
+
+  sound(
+    player.selectedSlot===0
+    ?350
+    :220,
+    .12,
+    "sawtooth",
+    .07
+  );
+
+  const angle =
+    Math.atan2(
+      mouse.y-H/2,
+      mouse.x-W/2
+    );
+
+  let best=null;
+
+  let bestDistance=Infinity;
+
+  for(
+    const enemy of enemies
+  ){
+
+    const dx =
+      enemy.x-player.x;
+
+    const dy =
+      enemy.y-player.y;
+
+    const d =
+      Math.hypot(dx,dy);
+
+    if(
+      d>weapon.range ||
+      d<15
+    )
+      continue;
+
+    const enemyAngle =
+      Math.atan2(
+        dy,
+        dx
+      );
+
+    const diff =
+      Math.atan2(
+        Math.sin(
+          enemyAngle-angle
+        ),
+        Math.cos(
+          enemyAngle-angle
+        )
+      );
+
+    if(
+      Math.abs(diff)
+      <=
+      Math.PI/4
+    ){
+
+      if(
+        d<bestDistance
+      ){
+
+        best=enemy;
+        bestDistance=d;
+
+      }
+
+    }
+
+  }
+
+
+  if(best){
+
+    best.hp -=
+      weapon.damage;
+
+    best.showHealth=true;
+
+    best.healthTimer=120;
+
+    if(
+      best.hp<=0
+    ){
+
+      collected+=3;
+
+      enemies.splice(
+        enemies.indexOf(best),
+        1
+      );
+
+      sound(
+        100,
+        .2,
+        "square",
+        .08
+      );
+
+    }
+
+  }
+
+}
+
+
+/* =====================================================
+   POMME
+===================================================== */
+
+function eatApple(){
+
+  if(
+    player.apples<=0 ||
+    player.hp>=player.maxHp
+  )
+    return;
+
+  player.apples--;
+
+  player.hp =
+    Math.min(
+      player.maxHp,
+      player.hp+25
+    );
+
+  sound(
+    650,
+    .15,
+    "sine",
+    .06
+  );
+
+  updateHotbar();
+
+  saveGame();
+
+}
+
+
+/* =====================================================
+   BOUCLIER
+===================================================== */
+
+function useShield(){
+
+  if(
+    player.selectedSlot!==2 ||
+    !player.shieldOwned ||
+    player.shieldCooldown>0
+  )
+    return;
+
+  player.shieldActive=true;
+
+  player.shieldCooldown=90;
+
+  sound(
+    500,
+    .15,
+    "triangle",
+    .08
+  );
+
+  setTimeout(
+    ()=>{
+      player.shieldActive=false;
+    },
+    400
+  );
+
+}
+
+
+/* =====================================================
+   CLIC
+===================================================== */
+
+window.addEventListener(
+  "contextmenu",
+  e=>{
+    e.preventDefault();
+  }
+);
+
+canvas.addEventListener(
+  "mousedown",
+  e=>{
+
+    if(
+      isShopOpen() ||
+      gamePaused
+    )
+      return;
+
+    startAudio();
+
+    if(e.button===0){
+
+      if(
+        player.selectedSlot===3
+      ){
+
+        eatApple();
+
+      }else if(
+        player.selectedSlot===4 ||
+        player.selectedSlot===5
+      ){
+
+        useTool();
+
+      }else{
+
+        attack();
+
+      }
+
+    }
+
+    if(e.button===2){
+
+      useShield();
+
+    }
+
+  }
+);
+
+
+/* =====================================================
+   JOUEUR UPDATE
+===================================================== */
+
+function updatePlayer(){
+
+  if(
+    isShopOpen() ||
+    gamePaused
+  )
+    return;
+
+  let dx=0;
+  let dy=0;
+
+  if(keys["z"])dy--;
+  if(keys["s"])dy++;
+  if(keys["q"])dx--;
+  if(keys["d"])dx++;
+
+  if(
+    dx!==0 ||
+    dy!==0
+  ){
+
+    const length =
+      Math.hypot(
+        dx,
+        dy
+      );
+
+    dx/=length;
+    dy/=length;
+
+    player.x +=
+      dx*
+      player.speed;
+
+    player.y +=
+      dy*
+      player.speed;
+
+  }
+
+  generateArea();
+
+  if(
+    player.hitCooldown>0
+  )
+    player.hitCooldown--;
+
+  if(
+    player.attackCooldown>0
+  )
+    player.attackCooldown--;
+
+  if(
+    player.attackAnimation>0
+  )
+    player.attackAnimation--;
+
+  if(
+    player.toolAnimation>0
+  )
+    player.toolAnimation--;
+
+}
+
+
+/* =====================================================
+   ENNEMIS
+===================================================== */
+
+function updateEnemies(){
+
+  if(gamePaused)
+    return;
+
+  for(
+    const enemy of enemies
+  ){
+
+    const d =
+      distance(
+        player,
+        enemy
+      );
+
+    if(d>900)
+      continue;
+
+    if(
+      enemy.healthTimer>0
+    ){
+
+      enemy.healthTimer--;
+
+      if(
+        enemy.healthTimer<=0
+      ){
+
+        enemy.showHealth=false;
+
+      }
+
+    }
+
+
+    const domeDistance =
+      Math.hypot(
+        enemy.x-spawnPoint.x,
+        enemy.y-spawnPoint.y
+      );
+
+    if(
+      domeDistance<
+      DOME_RADIUS
+    ){
+
+      const dx =
+        enemy.x-spawnPoint.x;
+
+      const dy =
+        enemy.y-spawnPoint.y;
+
+      const len =
+        Math.hypot(
+          dx,
+          dy
+        )||1;
+
+      enemy.x =
+        spawnPoint.x+
+        dx/len*
+        (DOME_RADIUS+10);
+
+      enemy.y =
+        spawnPoint.y+
+        dy/len*
+        (DOME_RADIUS+10);
+
+      continue;
+
+    }
+
+
+    if(d<120){
+
+      enemy.chase=true;
+
+      const dx =
+        player.x-enemy.x;
+
+      const dy =
+        player.y-enemy.y;
+
+      const len =
+        Math.hypot(
+          dx,
+          dy
+        )||1;
+
+      enemy.x +=
+        dx/len*
+        enemy.speed;
+
+      enemy.y +=
+        dy/len*
+        enemy.speed;
+
+    }else{
+
+      enemy.chase=false;
+
+      enemy.timer--;
+
+      if(
+        enemy.timer<=0
+      ){
+
+        enemy.angle =
+          Math.random()*
+          Math.PI*2;
+
+        enemy.timer =
+          50+
+          Math.random()*130;
+
+      }
+
+      enemy.x +=
+        Math.cos(
+          enemy.angle
+        )*
+        enemy.speed;
+
+      enemy.y +=
+        Math.sin(
+          enemy.angle
+        )*
+        enemy.speed;
+
+    }
+
+
+    if(
+      d<38 &&
+      player.hitCooldown<=0
+    ){
+
+      if(
+        player.shieldActive
+      ){
+
+        player.shieldActive=false;
+
+        player.hitCooldown=15;
+
+      }else{
+
+        damagePlayer(11);
+
+        player.hitCooldown=45;
+
+      }
+
+    }
+
+  }
+
+}
+
+
+/* =====================================================
+   DEGATS JOUEUR
+===================================================== */
+
+function damagePlayer(amount){
+
+  player.hp -=
+    amount;
+
+  showDamage();
+
+  sound(
+    80,
+    .25,
+    "sawtooth",
+    .1
+  );
+
+  if(
+    player.hp<=0
+  ){
+
+    playerDeath();
+
+  }
+
+}
+
+
+function showDamage(){
+
+  const flash =
+    document.getElementById(
+      "damageFlash"
+    );
+
+  flash.classList.add(
+    "show"
+  );
+
+  setTimeout(
+    ()=>{
+      flash.classList.remove(
+        "show"
+      );
+    },
+    90
+  );
+
+}
+
+
+/* =====================================================
+   MORT
+===================================================== */
+
+function playerDeath(){
+
+  collected=0;
+
+  wood=0;
+
+  stone=0;
+
+  player.weapons=[
+    true,
+    false
+  ];
+
+  player.shieldOwned=false;
+
+  player.shieldActive=false;
+
+  player.apples=0;
+
+  player.selectedSlot=0;
+
+  player.hp=
+    player.maxHp;
+
+  player.x=
+    spawnPoint.x;
+
+  player.y=
+    spawnPoint.y;
+
+  updateHotbar();
+
+  saveGame();
+
+}
+
+
+/* =====================================================
+   PIECES
+===================================================== */
+
+function updateCoins(){
+
+  for(
+    const coin of coins
+  ){
+
+    if(
+      coin.collected
+    )
+      continue;
+
+    if(
+      Math.abs(
+        coin.x-player.x
+      )>700 ||
+      Math.abs(
+        coin.y-player.y
+      )>700
+    )
+      continue;
+
+    if(
+      distance(
+        player,
+        coin
+      )<30
+    ){
+
+      coin.collected=true;
+
+      collected++;
+
+      sound(
+        900,
+        .1,
+        "square",
+        .06
+      );
+
+      saveGame();
+
+    }
+
+  }
+
+}
+
+
+/* =====================================================
+   DESSIN MAP
+===================================================== */
+
+function drawMap(){
+
+  ctx.fillStyle =
+    "#63b84f";
+
+  ctx.fillRect(
+    0,
+    0,
+    W,
+    H
+  );
+
+  const grid=100;
+
+  ctx.strokeStyle =
+    "rgba(20,90,30,.055)";
+
+  const offsetX =
+    W/2-
+    (player.x%grid);
+
+  const offsetY =
+    H/2-
+    (player.y%grid);
+
+  for(
+    let x=offsetX;
+    x<W;
+    x+=grid
+  ){
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      x,
+      0
+    );
+
+    ctx.lineTo(
+      x,
+      H
+    );
+
+    ctx.stroke();
+
+  }
+
+  for(
+    let y=offsetY;
+    y<H;
+    y+=grid
+  ){
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      0,
+      y
+    );
+
+    ctx.lineTo(
+      W,
+      y
+    );
+
+    ctx.stroke();
+
+  }
+
+}
+
+
+/* =====================================================
+   DOME
+===================================================== */
+
+function drawDome(){
+
+  const x =
+    W/2+
+    (
+      spawnPoint.x-
+      player.x
+    );
+
+  const y =
+    H/2+
+    (
+      spawnPoint.y-
+      player.y
+    );
+
+  ctx.fillStyle =
+    "rgba(50,130,255,.15)";
+
+  ctx.beginPath();
+
+  ctx.arc(
+    x,
+    y,
+    DOME_RADIUS,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fill();
+
+  ctx.strokeStyle =
+    "rgba(70,170,255,.85)";
+
+  ctx.lineWidth=5;
+
+  ctx.stroke();
+
+  ctx.lineWidth=1;
+
+}
+
+
+/* =====================================================
+   ARBRES
+===================================================== */
+
+function drawTrees(){
+
+  for(
+    const tree of trees
+  ){
+
+    const x =
+      W/2+
+      (
+        tree.x-
+        player.x
+      );
+
+    const y =
+      H/2+
+      (
+        tree.y-
+        player.y
+      );
+
+    if(
+      x<-100 ||
+      x>W+100 ||
+      y<-120 ||
+      y>H+120
+    )
+      continue;
+
+    const s =
+      tree.size;
+
+    ctx.fillStyle =
+      "rgba(0,0,0,.18)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+      x,
+      y+22,
+      s*.7,
+      10,
+      0,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle =
+      "#76502f";
+
+    ctx.fillRect(
+      x-7,
+      y,
+      14,
+      s
+    );
+
+    ctx.fillStyle =
+      "#1f7130";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      x,
+      y-8,
+      s*.65,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle =
+      "#399447";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      x-10,
+      y-18,
+      s*.32,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+  }
+
+}
+
+
+/* =====================================================
+   PIERRES
+===================================================== */
+
+function drawRocks(){
+
+  for(
+    const rock of rocks
+  ){
+
+    const x =
+      W/2+
+      (
+        rock.x-
+        player.x
+      );
+
+    const y =
+      H/2+
+      (
+        rock.y-
+        player.y
+      );
+
+    if(
+      x<-100 ||
+      x>W+100 ||
+      y<-100 ||
+      y>H+100
+    )
+      continue;
+
+    const s =
+      rock.size;
+
+    ctx.fillStyle =
+      "rgba(0,0,0,.2)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+      x,
+      y+12,
+      s,
+      7,
+      0,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.fillStyle =
+      "#777";
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      x-s,
+      y+8
+    );
+
+    ctx.lineTo(
+      x-s*.7,
+      y-s*.7
+    );
+
+    ctx.lineTo(
+      x+s*.2,
+      y-s
+    );
+
+    ctx.lineTo(
+      x+s,
+      y
+    );
+
+    ctx.lineTo(
+      x+s*.65,
+      y+s*.6
+    );
+
+    ctx.lineTo(
+      x-s*.5,
+      y+s*.65
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+    ctx.fillStyle =
+      "#aaa";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      x-5,
+      y-8,
+      4,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+  }
+
+}
+
+
+/* =====================================================
+   COINS
+===================================================== */
+
+function drawCoins(){
+
+  for(
+    const coin of coins
+  ){
+
+    if(
+      coin.collected
+    )
+      continue;
+
+    const x =
+      W/2+
+      (
+        coin.x-
+        player.x
+      );
+
+    const y =
+      H/2+
+      (
+        coin.y-
+        player.y
+      );
+
+    if(
+      x<-30 ||
+      x>W+30 ||
+      y<-30 ||
+      y>H+30
+    )
+      continue;
+
+    ctx.fillStyle =
+      "#ffd700";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      x,
+      y,
+      9,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fill();
+
+  }
+
+}
+
+
+/* =====================================================
+   ENNEMIS DESSIN
+===================================================== */
+
+function drawEnemies(){
+
+  for(
+    const enemy of enemies
+  ){
+
+    const x =
+      W/2+
+      (
+        enemy.x-
+        player.x
+      );
+
+    const y =
+      H/2+
+      (
+        enemy.y-
+        player.y
+      );
+
+    if(
+      x<-80 ||
+      x>W+80 ||
+      y<-80 ||
+      y>H+80
+    )
+      continue;
+
+    const s =
+      enemy.size;
+
+    ctx.fillStyle =
+      enemy.chase
+      ?" #ff1717"
+      :"#d92626";
+
+    ctx.fillRect(
+      x-s/2,
+      y-s/2,
+      s,
+      s
+    );
+
+    ctx.fillStyle =
+      "white";
+
+    ctx.fillRect(
+      x-9,
+      y-8,
+      6,
+      6
+    );
+
+    ctx.fillRect(
+      x+3,
+      y-8,
+      6,
+      6
+    );
+
+    if(
+      enemy.showHealth
+    ){
+
+      const width=48;
+
+      const percent =
+        Math.max(
+          0,
+          enemy.hp/
+          enemy.maxHp
+        );
+
+      ctx.fillStyle =
+        "rgba(0,0,0,.75)";
+
+      ctx.fillRect(
+        x-width/2,
+        y-s/2-14,
+        width,
+        6
+      );
+
+      ctx.fillStyle =
+        "#35e35b";
+
+      ctx.fillRect(
+        x-width/2,
+        y-s/2-14,
+        width*percent,
+        6
+      );
+
+    }
+
+  }
+
+}
+
+
+/* =====================================================
+   OUTILS DESSIN
+===================================================== */
+
+function drawTool(){
+
+  if(
+    player.selectedSlot!==4 &&
+    player.selectedSlot!==5
+  )
+    return;
+
+  const angle =
+    Math.atan2(
+      mouse.y-H/2,
+      mouse.x-W/2
+    );
+
+  let swing=0;
+
+  if(
+    player.toolAnimation>0
+  ){
+
+    swing =
+      (
+        player.toolAnimation/
+        18
+      )*
+      1.4;
+
+  }
+
+  const finalAngle =
+    angle-
+    swing;
+
+  ctx.save();
+
+  ctx.translate(
+    W/2,
+    H/2
+  );
+
+  ctx.rotate(
+    finalAngle
+  );
+
+  /*
+    Manche
+  */
+
+  ctx.fillStyle =
+    "#704522";
+
+  ctx.fillRect(
+    0,
+    -3,
+    58,
+    6
+  );
+
+
+  if(
+    player.selectedSlot===4
+  ){
+
+    /*
+      PIOCHE
+    */
+
+    ctx.strokeStyle =
+      "#b9b9b9";
+
+    ctx.lineWidth=7;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      42,
+      -15
+    );
+
+    ctx.lineTo(
+      42,
+      15
+    );
+
+    ctx.stroke();
+
+    ctx.lineWidth=4;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      27,
+      -18
+    );
+
+    ctx.quadraticCurveTo(
+      42,
+      -27,
+      57,
+      -18
+    );
+
+    ctx.stroke();
+
+  }else{
+
+    /*
+      HACHE
+    */
+
+    ctx.fillStyle =
+      "#aaa";
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      42,
+      -17
+    );
+
+    ctx.lineTo(
+      65,
+      -10
+    );
+
+    ctx.lineTo(
+      65,
+      15
+    );
+
+    ctx.lineTo(
+      42,
+      10
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+  }
+
+  ctx.restore();
+
+}
+
+
+/* =====================================================
+   BOUCLIER
+===================================================== */
+
+function drawShield(){
+
+  if(
+    !player.shieldOwned
+  )
+    return;
+
+  const angle =
+    Math.atan2(
+      mouse.y-H/2,
+      mouse.x-W/2
+    );
+
+  const distanceFromPlayer=35;
+
+  const x =
+    W/2+
+    Math.cos(angle)*
+    distanceFromPlayer;
+
+  const y =
+    H/2+
+    Math.sin(angle)*
+    distanceFromPlayer;
+
+  ctx.save();
+
+  ctx.translate(
+    x,
+    y
+  );
+
+  ctx.rotate(
+    angle
+  );
+
+  ctx.fillStyle =
+    player.shieldActive
+    ?"white"
+    :"#3975ff";
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    0,
+    -29
+  );
+
+  ctx.lineTo(
+    25,
+    -20
+  );
+
+  ctx.lineTo(
+    22,
+    11
+  );
+
+  ctx.lineTo(
+    0,
+    32
+  );
+
+  ctx.lineTo(
+    -22,
+    11
+  );
+
+  ctx.lineTo(
+    -25,
+    -20
+  );
+
+  ctx.closePath();
+
+  ctx.fill();
+
+  ctx.strokeStyle =
+    "#e5b936";
+
+  ctx.lineWidth=4;
+
+  ctx.stroke();
+
+  ctx.restore();
+
+}
+
+
+/* =====================================================
+   EPEE
+===================================================== */
+
+function drawSword(){
+
+  if(
+    player.selectedSlot!==0 &&
+    player.selectedSlot!==1
+  )
+    return;
+
+  if(
+    !player.weapons[
+      player.selectedSlot
+    ]
+  )
+    return;
+
+  const angle =
+    Math.atan2(
+      mouse.y-H/2,
+      mouse.x-W/2
+    );
+
+  let swing=0;
+
+  if(
+    player.attackAnimation>0
+  ){
+
+    swing =
+      (
+        player.attackAnimation/
+        12
+      )*
+      1.15;
+
+  }
+
+  ctx.save();
+
+  ctx.translate(
+    W/2,
+    H/2
+  );
+
+  ctx.rotate(
+    angle-
+    swing
+  );
+
+  ctx.fillStyle =
+    "#542f18";
+
+  ctx.fillRect(
+    0,
+    -3,
+    18,
+    6
+  );
+
+  ctx.strokeStyle =
+    "#e1b83b";
+
+  ctx.lineWidth=6;
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    12,
+    -11
+  );
+
+  ctx.lineTo(
+    12,
+    11
+  );
+
+  ctx.stroke();
+
+  ctx.fillStyle =
+    player.selectedSlot===0
+    ?"#dfeeff"
+    :"#ff3030";
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    16,
+    -6
+  );
+
+  ctx.lineTo(
+    65,
+    0
+  );
+
+  ctx.lineTo(
+    16,
+    6
+  );
+
+  ctx.closePath();
+
+  ctx.fill();
+
+  ctx.restore();
+
+}
+
+
+/* =====================================================
+   PLAYER DRAW
+===================================================== */
+
+function drawPlayer(){
+
+  const x=W/2;
+  const y=H/2;
+  const s=player.size;
+
+  ctx.fillStyle =
+    player.color;
+
+  ctx.fillRect(
+    x-s/2,
+    y-s/2,
+    s,
+    s
+  );
+
+  ctx.fillStyle =
+    "white";
+
+  ctx.fillRect(
+    x-9,
+    y-8,
+    6,
+    6
+  );
+
+  ctx.fillRect(
+    x+3,
+    y-8,
+    6,
+    6
+  );
+
+  drawShield();
+
+  drawSword();
+
+  drawTool();
+
+}
+
+
+/* =====================================================
+   HUD
+===================================================== */
+
+function updateHUD(){
+
+  document.getElementById(
+    "hp"
+  ).textContent =
+    Math.max(
+      0,
+      player.hp
+    );
+
+  document.getElementById(
+    "money"
+  ).textContent =
+    collected;
+
+  document.getElementById(
+    "apples"
+  ).textContent =
+    player.apples;
+
+  document.getElementById(
+    "wood"
+  ).textContent =
+    wood;
+
+  document.getElementById(
+    "stone"
+  ).textContent =
+    stone;
+
+}
+
+
+/* =====================================================
+   MENU / SKIN
+===================================================== */
+
+const mainMenu =
+document.getElementById(
+  "mainMenu"
+);
+
+const skinPanel =
+document.getElementById(
+  "skinPanel"
+);
+
+const settingsPanel =
+document.getElementById(
+  "settingsPanel"
+);
+
+const gameSettingsPanel =
+document.getElementById(
+  "gameSettingsPanel"
+);
+
+let gameStarted=false;
+
+let gamePaused=false;
+
+
+document.getElementById(
+  "playButton"
+).onclick =
+()=>{
+
+  startAudio();
+
+  gameStarted=true;
+
+  mainMenu.style.display =
+    "none";
+
+  gamePaused=false;
+
+  startMusic();
+
+};
+
+
+document.getElementById(
+  "skinButton"
+).onclick =
+()=>{
+
+  mainMenu.style.display =
+    "none";
+
+  skinPanel.classList.add(
+    "open"
+  );
+
+};
+
+
+document.getElementById(
+  "closeSkin"
+).onclick =
+()=>{
+
+  skinPanel.classList.remove(
+    "open"
+  );
+
+  mainMenu.style.display =
+    "flex";
+
+};
+
+
+document.querySelectorAll(
+  ".skin"
+).forEach(
+  skin=>{
+
+    skin.onclick =
+      ()=>{
+
+        document
+          .querySelectorAll(
+            ".skin"
+          )
+          .forEach(
+            x=>
+              x.classList.remove(
+                "selected"
+              )
+          );
+
+        skin.classList.add(
+          "selected"
+        );
+
+        player.color =
+          skin.dataset.color;
+
+        saveGame();
+
+      };
+
+  }
+);
+
+
+/* =====================================================
+   SETTINGS
+===================================================== */
+
+function updateVolumeUI(){
+
+  const percent =
+    Math.round(
+      volume*100
+    );
+
+  document.getElementById(
+    "volumeRange"
+  ).value =
+    percent;
+
+  document.getElementById(
+    "gameVolumeRange"
+  ).value =
+    percent;
+
+  document.getElementById(
+    "volumeValue"
+  ).textContent =
+    percent+"%";
+
+  document.getElementById(
+    "gameVolumeValue"
+  ).textContent =
+    percent+"%";
+
+}
+
+
+function setVolume(value){
+
+  volume =
+    Number(value)/100;
+
+  updateVolumeUI();
+
+  updateAudio();
+
+  saveGame();
+
+}
+
+
+document.getElementById(
+  "volumeRange"
+).oninput =
+e=>
+setVolume(
+  e.target.value
+);
+
+
+document.getElementById(
+  "gameVolumeRange"
+).oninput =
+e=>
+setVolume(
+  e.target.value
+);
+
+
+function updateMusicButtons(){
+
+  const text =
+    musicEnabled
+    ?"🎵 MUSIQUE : ON"
+    :"🔇 MUSIQUE : OFF";
+
+  document.getElementById(
+    "musicToggle"
+  ).textContent =
+    text;
+
+  document.getElementById(
+    "gameMusicToggle"
+  ).textContent =
+    text;
+
+}
+
+
+function toggleMusic(){
+
+  musicEnabled =
+    !musicEnabled;
+
+  updateMusicButtons();
+
+  updateAudio();
+
+  saveGame();
+
+}
+
+
+document.getElementById(
+  "musicToggle"
+).onclick =
+toggleMusic;
+
+document.getElementById(
+  "gameMusicToggle"
+).onclick =
+toggleMusic;
+
+
+document.getElementById(
+  "settingsButton"
+).onclick =
+()=>{
+
+  mainMenu.style.display =
+    "none";
+
+  settingsPanel.classList.add(
+    "open"
+  );
+
+};
+
+
+document.getElementById(
+  "closeSettings"
+).onclick =
+()=>{
+
+  settingsPanel.classList.remove(
+    "open"
+  );
+
+  mainMenu.style.display =
+    "flex";
+
+};
+
+
+/* =====================================================
+   PARAMETRES EN JEU
+===================================================== */
+
+document.getElementById(
+  "gameSettings"
+).onclick =
+()=>{
+
+  gamePaused=true;
+
+  gameSettingsPanel.classList.add(
+    "open"
+  );
+
+};
+
+
+document.getElementById(
+  "resumeButton"
+).onclick =
+()=>{
+
+  gamePaused=false;
+
+  gameSettingsPanel.classList.remove(
+    "open"
+  );
+
+};
+
+
+document.getElementById(
+  "gameMenuButton"
+).onclick =
+()=>{
+
+  gamePaused=true;
+
+  gameSettingsPanel.classList.remove(
+    "open"
+  );
+
+  mainMenu.style.display =
+    "flex";
+
+};
+
+
+/* =====================================================
+   LOOP
+===================================================== */
+
+function loop(){
+
+  if(gameStarted){
+
+    updatePlayer();
+
+    updateEnemies();
+
+    updateCoins();
+
+    drawMap();
+
+    drawDome();
+
+    drawTrees();
+
+    drawRocks();
+
+    drawCoins();
+
+    drawEnemies();
+
+    drawPlayer();
+
+    updateHUD();
+
+  }
+
+  requestAnimationFrame(
+    loop
+  );
+
+}
+
+
+/* =====================================================
+   START
+===================================================== */
+
+loadGame();
+
+updateVolumeUI();
+
+updateMusicButtons();
+
+updateHotbar();
+
+generateArea();
+
+loop();
+
+</script>
+
+</body>
+</html>
